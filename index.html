@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cambridge Vocab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --palette-bg-primary-core: #ff385c;
+      --palette-text-primary: #222222;
+      --palette-text-focused: #3f3f3f;
+      --palette-text-secondary: #6a6a6a;
+      --palette-text-disabled: rgba(0, 0, 0, 0.24);
+      --palette-surface-light: #f2f2f2;
+      --palette-white: #ffffff;
+      --shadow-card: rgba(0, 0, 0, 0.02) 0px 0px 0px 1px,
+        rgba(0, 0, 0, 0.04) 0px 2px 6px,
+        rgba(0, 0, 0, 0.1) 0px 4px 8px;
+      --shadow-hover: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+      --font: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      --radius-btn: 8px;
+      --radius-card: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font);
+      background: var(--palette-white);
+      color: var(--palette-text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 32px 24px 64px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .brand-mark {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--palette-bg-primary-core);
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .brand-mark svg { width: 18px; height: 18px; fill: white; }
+
+    .brand-text h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.44px;
+      line-height: 1.18;
+    }
+
+    .brand-text p {
+      font-size: 13px;
+      color: var(--palette-text-secondary);
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 32px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .tab {
+      appearance: none;
+      border: none;
+      background: transparent;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--palette-text-secondary);
+      padding: 12px 18px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .tab:hover { color: var(--palette-text-primary); }
+    .tab.active { color: var(--palette-text-primary); }
+
+    .tab.active::after {
+      content: '';
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: -1px;
+      height: 2px;
+      background: var(--palette-text-primary);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--palette-white);
+      border-radius: var(--radius-card);
+      box-shadow: var(--shadow-card);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.32px;
+      color: var(--palette-text-secondary);
+      margin-bottom: 12px;
+    }
+
+    textarea,
+    .text-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.6;
+      color: var(--palette-text-primary);
+      background: transparent;
+    }
+
+    textarea { min-height: 140px; resize: vertical; }
+
+    textarea::placeholder,
+    .text-input::placeholder {
+      color: var(--palette-text-disabled);
+      font-weight: 400;
+    }
+
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .preview-header .card-label { margin-bottom: 0; }
+
+    .action-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill-select {
+      appearance: none;
+      border: none;
+      background: var(--palette-surface-light);
+      color: var(--palette-text-primary);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 14px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .icon-btn {
+      appearance: none;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--palette-surface-light);
+      color: var(--palette-text-primary);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: box-shadow 0.15s ease, transform 0.1s ease, background 0.15s ease;
+      flex-shrink: 0;
+    }
+
+    .icon-btn:hover {
+      box-shadow: var(--shadow-hover);
+      background: #ebebeb;
+    }
+
+    .icon-btn:active { transform: scale(0.92); }
+    .icon-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+
+    .icon-btn.primary {
+      background: var(--palette-text-primary);
+      color: #fff;
+    }
+
+    .icon-btn.primary:hover { background: var(--palette-bg-primary-core); }
+    .icon-btn.speaking,
+    .icon-btn.listening { background: var(--palette-bg-primary-core); color: #fff; }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    .preview-body {
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1.75;
+      min-height: 72px;
+      user-select: text;
+    }
+
+    .preview-empty {
+      color: var(--palette-text-disabled);
+      font-weight: 400;
+      font-size: 16px;
+    }
+
+    .word,
+    .punct {
+      display: inline;
+      border-radius: 4px;
+      padding: 1px 0;
+      transition: background 0.1s ease, box-shadow 0.1s ease;
+      cursor: pointer;
+    }
+
+    .word:hover,
+    .word.is-hover {
+      background: rgba(255, 56, 92, 0.12);
+      box-shadow: inset 0 -2px 0 var(--palette-bg-primary-core);
+    }
+
+    .punct {
+      padding: 1px 2px;
+      color: var(--palette-text-secondary);
+    }
+
+    .punct:hover,
+    .punct.is-hover {
+      background: rgba(255, 56, 92, 0.08);
+      color: var(--palette-bg-primary-core);
+    }
+
+    .phrase-glow {
+      background: rgba(255, 56, 92, 0.12) !important;
+      box-shadow: inset 0 -2px 0 var(--palette-bg-primary-core);
+    }
+
+    .hint {
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--palette-text-secondary);
+    }
+
+    .hint strong {
+      font-weight: 600;
+      color: var(--palette-text-focused);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .search-row .text-input { flex: 1; min-width: 0; }
+
+    .cta-btn {
+      appearance: none;
+      border: none;
+      background: var(--palette-text-primary);
+      color: #fff;
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 500;
+      padding: 12px 24px;
+      border-radius: var(--radius-btn);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s ease, transform 0.1s ease;
+    }
+
+    .cta-btn:hover { background: var(--palette-bg-primary-core); }
+    .cta-btn:active { transform: scale(0.96); }
+    .cta-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .cta-btn.secondary {
+      background: var(--palette-surface-light);
+      color: var(--palette-text-primary);
+    }
+
+    .cta-btn.secondary:hover {
+      background: #ebebeb;
+      box-shadow: var(--shadow-hover);
+    }
+
+    .or-label {
+      margin: 20px 0 10px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--palette-text-secondary);
+    }
+
+    .lookup-group {
+      margin-top: 18px;
+    }
+
+    .lookup-group-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.32px;
+      text-transform: uppercase;
+      color: var(--palette-text-secondary);
+      margin-bottom: 8px;
+    }
+
+    .brand-btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .brand-btn {
+      appearance: none;
+      border: none;
+      background: #222222;
+      color: #fff;
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    }
+
+    .brand-btn:hover {
+      background: #000;
+      box-shadow: var(--shadow-hover);
+    }
+
+    .brand-btn:active { transform: scale(0.96); }
+    .brand-btn:disabled { opacity: 0.35; cursor: not-allowed; box-shadow: none; }
+
+    .brand-btn .mark {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background: #fff;
+      color: #222;
+      display: grid;
+      place-items: center;
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .brand-btn .mark svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .chip {
+      appearance: none;
+      border: none;
+      background: var(--palette-surface-light);
+      color: var(--palette-text-primary);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 14px;
+      border-radius: 14px;
+      cursor: pointer;
+    }
+
+    .chip:hover {
+      box-shadow: var(--shadow-hover);
+      background: #ebebeb;
+    }
+
+    .quick-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .score-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 14px;
+      background: #fafafa;
+      display: none;
+    }
+
+    .score-box.show { display: block; }
+
+    .score-box .score {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.44px;
+    }
+
+    .score-box .heard {
+      margin-top: 8px;
+      font-size: 14px;
+      color: var(--palette-text-secondary);
+    }
+
+    .score-box .heard em {
+      font-style: normal;
+      color: var(--palette-text-primary);
+      font-weight: 500;
+    }
+
+    .playback-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .playback-row audio {
+      display: none;
+    }
+
+    .speak-target {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.5;
+      letter-spacing: -0.18px;
+      min-height: 48px;
+      margin-bottom: 16px;
+    }
+
+    /* Selection lookup popup */
+    .lookup-popup {
+      position: absolute;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px;
+      background: #222;
+      border-radius: 999px;
+      box-shadow: var(--shadow-hover);
+      transform: translateX(-50%);
+    }
+
+    .lookup-popup.show { display: flex; }
+
+    .lookup-popup button {
+      appearance: none;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: background 0.12s ease;
+    }
+
+    .lookup-popup button:hover { background: rgba(255, 255, 255, 0.12); }
+
+    .lookup-popup button svg { width: 18px; height: 18px; }
+
+    .lookup-popup .sel-text {
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 0 6px;
+    }
+
+    @media (max-width: 550px) {
+      .page { padding: 24px 16px 48px; }
+      .preview-body { font-size: 16px; }
+      .search-row { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 3c.4 0 .75.24.9.61l1.72 4.2 4.5.4c.4.03.73.3.84.68a.9.9 0 0 1-.26.94l-3.4 3.05.98 4.4c.09.4-.06.8-.39 1.02a.9.9 0 0 1-1.02.05L12 16.4l-3.87 2.55a.9.9 0 0 1-1.02-.05.9.9 0 0 1-.39-1.02l.98-4.4-3.4-3.05a.9.9 0 0 1-.26-.94.9.9 0 0 1 .84-.68l4.5-.4 1.72-4.2A.97.97 0 0 1 12 3z"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>Cambridge Vocab</h1>
+        <p>Read · look up · speak</p>
+      </div>
+    </header>
+
+    <nav class="tabs" role="tablist" aria-label="Main">
+      <button class="tab active" role="tab" aria-selected="true" data-tab="reader">Reader</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="vocab">Vocab</button>
+      <button class="tab" role="tab" aria-selected="false" data-tab="speak">Speak</button>
+    </nav>
+
+    <!-- TAB 1: Reader -->
+    <section class="panel active" id="panel-reader" role="tabpanel">
+      <div class="card">
+        <div class="card-label">Paste English text</div>
+        <textarea id="input" placeholder="Paste or type an English paragraph here…" spellcheck="true" autofocus></textarea>
+      </div>
+
+      <div class="card" style="position: relative;">
+        <div class="preview-header">
+          <div class="card-label">Live preview</div>
+          <div class="action-row">
+            <select id="engine" class="pill-select" title="Voice engine">
+              <option value="google">Google TTS</option>
+              <option value="browser">Browser</option>
+            </select>
+            <select id="accent" class="pill-select" title="Accent">
+              <option value="en-GB">UK</option>
+              <option value="en-US">US</option>
+            </select>
+            <button type="button" class="icon-btn primary" id="speaker" title="Speak full text" aria-label="Speak full text" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+              </svg>
+            </button>
+            <button type="button" class="icon-btn" id="open-translate" title="Google Translate" aria-label="Google Translate" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 8l6 6"></path><path d="M4 14l6-6 2-3"></path><path d="M2 5h12"></path>
+                <path d="M7 2h1"></path><path d="M22 22l-5-10-5 10"></path><path d="M14 18h6"></path>
+              </svg>
+            </button>
+            <button type="button" class="icon-btn" id="open-youglish" title="YouGlish" aria-label="YouGlish" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"></polygon>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="preview-body" id="preview">
+          <span class="preview-empty">Your text will appear here. Hover a word, or select text for lookup.</span>
+        </div>
+
+        <div class="lookup-popup" id="lookup-popup" role="toolbar" aria-label="Lookup selection">
+          <span class="sel-text" id="popup-text"></span>
+          <button type="button" id="popup-cambridge" title="Cambridge Dictionary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          </button>
+          <button type="button" id="popup-translate" title="Google Translate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/></svg>
+          </button>
+          <button type="button" id="popup-define" title="Google meaning search">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
+          </button>
+        </div>
+
+        <p class="hint">
+          <strong>Hover a word</strong> to highlight it.
+          <strong>Hover near , or .</strong> to highlight the whole phrase.
+          <strong>Select text</strong> → popup: Cambridge · Translate · Google define.
+          <strong>Click a word</strong> to hear it.
+        </p>
+      </div>
+    </section>
+
+    <!-- TAB 2: Vocab -->
+    <section class="panel" id="panel-vocab" role="tabpanel">
+      <div class="card">
+        <div class="card-label">Look up a word</div>
+        <form id="vocab-form" class="search-row" autocomplete="off">
+          <input type="text" id="vocab-input" class="text-input" placeholder="e.g. resilient / give up / heavy rain" spellcheck="true" />
+          <button type="submit" class="cta-btn" id="vocab-submit" disabled>Cambridge</button>
+        </form>
+
+        <p class="or-label">Or look up in:</p>
+
+        <div class="lookup-group">
+          <div class="lookup-group-title">Dictionary · meaning</div>
+          <div class="brand-btns">
+            <button type="button" class="brand-btn" data-lookup="oxford" disabled>
+              <span class="mark">O</span> Oxford
+            </button>
+            <button type="button" class="brand-btn" data-lookup="google-define" disabled>
+              <span class="mark">G</span> Google Define
+            </button>
+            <button type="button" class="brand-btn" data-lookup="translate" disabled>
+              <span class="mark">文</span> Translate
+            </button>
+          </div>
+        </div>
+
+        <div class="lookup-group">
+          <div class="lookup-group-title">Collocation · natural pairs</div>
+          <div class="brand-btns">
+            <button type="button" class="brand-btn" data-lookup="ozdic" disabled>
+              <span class="mark">Oz</span> Ozdic
+            </button>
+          </div>
+        </div>
+
+        <div class="lookup-group">
+          <div class="lookup-group-title">Phrasal verbs</div>
+          <div class="brand-btns">
+            <button type="button" class="brand-btn" data-lookup="phrasal" disabled>
+              <span class="mark">PV</span> EnglishPage
+            </button>
+            <button type="button" class="brand-btn" data-lookup="cambridge-pv" disabled>
+              <span class="mark">C</span> Cambridge
+            </button>
+          </div>
+        </div>
+
+        <div class="lookup-group">
+          <div class="lookup-group-title">Synonyms · word choice</div>
+          <div class="brand-btns">
+            <button type="button" class="brand-btn" data-lookup="thesaurus" disabled>
+              <span class="mark">P</span> Power Thesaurus
+            </button>
+          </div>
+        </div>
+
+        <div class="lookup-group">
+          <div class="lookup-group-title">Examples · real usage</div>
+          <div class="brand-btns">
+            <button type="button" class="brand-btn" data-lookup="reverso" disabled>
+              <span class="mark">R</span> Reverso
+            </button>
+            <button type="button" class="brand-btn" data-lookup="ludwig" disabled>
+              <span class="mark">L</span> Ludwig
+            </button>
+          </div>
+        </div>
+
+        <div class="lookup-group">
+          <div class="lookup-group-title">Pronunciation · hear natives</div>
+          <div class="brand-btns">
+            <button type="button" class="brand-btn" data-lookup="youglish" disabled>
+              <span class="mark">Y</span> YouGlish
+            </button>
+            <button type="button" class="brand-btn" data-lookup="forvo" disabled>
+              <span class="mark">F</span> Forvo
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: Speak -->
+    <section class="panel" id="panel-speak" role="tabpanel">
+      <div class="card">
+        <div class="card-label">Practice sentence</div>
+        <textarea id="speak-input" placeholder="Type or paste the sentence you want to practice…"></textarea>
+        <div class="quick-links">
+          <button type="button" class="chip speak-sample">I would appreciate your help with this.</button>
+          <button type="button" class="chip speak-sample">Could you clarify what you mean?</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Say it aloud</div>
+        <div class="speak-target" id="speak-target">Type a sentence above, then press Hear / Check.</div>
+        <div class="action-row">
+          <button type="button" class="cta-btn secondary" id="speak-play" disabled>Hear model</button>
+          <button type="button" class="cta-btn" id="speak-mic" disabled>Check me</button>
+          <button type="button" class="cta-btn secondary" id="speak-ipa" title="Speech to IPA">Speech → IPA</button>
+        </div>
+        <div class="score-box" id="score-box">
+          <div class="score" id="score-value">—</div>
+          <div class="heard">Heard: <em id="score-heard">—</em></div>
+          <div class="playback-row">
+            <button type="button" class="cta-btn secondary" id="play-recording" disabled>Play my voice</button>
+            <button type="button" class="cta-btn secondary" id="compare-model" disabled>Compare model</button>
+            <audio id="my-recording" controls></audio>
+          </div>
+        </div>
+        <p class="hint">
+          <strong>Check me</strong> records your mic + scores with speech recognition (Chrome/Edge).
+          After speaking, press <strong>Play my voice</strong> to hear yourself, or <strong>Compare model</strong> for the target.
+          <strong>Speech → IPA</strong> opens toIPA.
+        </p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (function () {
+      const input = document.getElementById('input');
+      const preview = document.getElementById('preview');
+      const speaker = document.getElementById('speaker');
+      const openTranslateBtn = document.getElementById('open-translate');
+      const openYouglishBtn = document.getElementById('open-youglish');
+      const accentSelect = document.getElementById('accent');
+      const engineSelect = document.getElementById('engine');
+      const lookupPopup = document.getElementById('lookup-popup');
+      const popupText = document.getElementById('popup-text');
+
+      const vocabInput = document.getElementById('vocab-input');
+      const vocabForm = document.getElementById('vocab-form');
+      const vocabSubmit = document.getElementById('vocab-submit');
+
+      const speakInput = document.getElementById('speak-input');
+      const speakTarget = document.getElementById('speak-target');
+      const speakPlay = document.getElementById('speak-play');
+      const speakMic = document.getElementById('speak-mic');
+      const speakIpa = document.getElementById('speak-ipa');
+      const scoreBox = document.getElementById('score-box');
+      const scoreValue = document.getElementById('score-value');
+      const scoreHeard = document.getElementById('score-heard');
+      const playRecordingBtn = document.getElementById('play-recording');
+      const compareModelBtn = document.getElementById('compare-model');
+      const myRecordingEl = document.getElementById('my-recording');
+
+      let audioEl = null;
+      let voices = [];
+      let recognition = null;
+      let listening = false;
+      let selectedLookup = '';
+      let mediaRecorder = null;
+      let mediaStream = null;
+      let recordedChunks = [];
+      let recordingUrl = '';
+
+      function openUrl(url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+
+      /* ---------- URL builders ---------- */
+      function buildTranslateUrl(text) {
+        return `https://translate.google.com.vn/?sl=en&tl=vi&text=${encodeURIComponent(text.trim())}&op=translate`;
+      }
+
+      function buildCambridgeUrl(word) {
+        const slug = word.trim().toLowerCase().replace(/\s+/g, '-');
+        return `https://dictionary.cambridge.org/dictionary/english/${encodeURIComponent(slug)}`;
+      }
+
+      function buildOxfordUrl(word) {
+        const slug = word.trim().toLowerCase().replace(/\s+/g, '-');
+        return `https://www.oxfordlearnersdictionaries.com/definition/english/${encodeURIComponent(slug)}`;
+      }
+
+      function buildGoogleDefineUrl(word) {
+        return `https://www.google.com/search?q=${encodeURIComponent('define: ' + word.trim())}`;
+      }
+
+      function buildYouglishUrl(text) {
+        return `https://youglish.com/pronounce/${encodeURIComponent(text.trim())}/english`;
+      }
+
+      function buildForvoUrl(word) {
+        const slug = word.trim().toLowerCase().replace(/\s+/g, '_');
+        return `https://forvo.com/word/${encodeURIComponent(slug)}/`;
+      }
+
+      function buildReversoUrl(word) {
+        return `https://context.reverso.net/translation/english-vietnamese/${encodeURIComponent(word.trim())}`;
+      }
+
+      function buildOzdicUrl(word) {
+        return `https://ozdic.com/collocation/${encodeURIComponent(word.trim().toLowerCase())}`;
+      }
+
+      function buildThesaurusUrl(word) {
+        return `https://www.powerthesaurus.org/${encodeURIComponent(word.trim().toLowerCase().replace(/\s+/g, '_'))}`;
+      }
+
+      function buildLudwigUrl(word) {
+        return `https://ludwig.guru/s/${encodeURIComponent(word.trim())}`;
+      }
+
+      function buildPhrasalUrl(word) {
+        // EnglishPage has letter index; Google site search is the practical jump
+        return `https://www.google.com/search?q=${encodeURIComponent('site:englishpage.com phrasal verb ' + word.trim())}`;
+      }
+
+      function buildGoogleTtsUrl(text, lang) {
+        const tl = lang.startsWith('en-GB') ? 'en-GB' : 'en';
+        return (
+          'https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob' +
+          '&tl=' + encodeURIComponent(tl) +
+          '&q=' + encodeURIComponent(text)
+        );
+      }
+
+      function chunkText(text, maxLen) {
+        const clean = text.trim().replace(/\s+/g, ' ');
+        if (clean.length <= maxLen) return [clean];
+        const parts = [];
+        let buf = '';
+        clean.split(/([.!?…]+(?:\s+|$)|,\s+)/).forEach((piece) => {
+          if (!piece) return;
+          if ((buf + piece).length > maxLen) {
+            if (buf.trim()) parts.push(buf.trim());
+            buf = piece;
+          } else {
+            buf += piece;
+          }
+        });
+        if (buf.trim()) parts.push(buf.trim());
+        const out = [];
+        parts.forEach((p) => {
+          if (p.length <= maxLen) out.push(p);
+          else for (let i = 0; i < p.length; i += maxLen) out.push(p.slice(i, i + maxLen));
+        });
+        return out;
+      }
+
+      /* ---------- Speech ---------- */
+      function loadVoices() {
+        voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
+      }
+      if (window.speechSynthesis) {
+        loadVoices();
+        speechSynthesis.onvoiceschanged = loadVoices;
+      }
+
+      function pickVoice(lang) {
+        if (!voices.length) return null;
+        return voices.find((v) => v.lang === lang) ||
+          voices.find((v) => v.lang.startsWith(lang.slice(0, 2))) ||
+          voices[0];
+      }
+
+      function stopSpeaking() {
+        if (window.speechSynthesis) speechSynthesis.cancel();
+        if (audioEl) { audioEl.pause(); audioEl = null; }
+        speaker.classList.remove('speaking');
+      }
+
+      function speakBrowser(text) {
+        if (!window.speechSynthesis) return;
+        speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = accentSelect.value;
+        utter.rate = 0.95;
+        const voice = pickVoice(accentSelect.value);
+        if (voice) utter.voice = voice;
+        speaker.classList.add('speaking');
+        utter.onend = () => speaker.classList.remove('speaking');
+        utter.onerror = () => speaker.classList.remove('speaking');
+        speechSynthesis.speak(utter);
+      }
+
+      async function speakGoogle(text) {
+        const chunks = chunkText(text, 180);
+        const lang = accentSelect.value;
+        speaker.classList.add('speaking');
+        for (const chunk of chunks) {
+          await new Promise((resolve, reject) => {
+            const audio = new Audio(buildGoogleTtsUrl(chunk, lang));
+            audioEl = audio;
+            audio.onended = resolve;
+            audio.onerror = () => reject(new Error('tts failed'));
+            audio.play().catch(reject);
+          });
+        }
+        speaker.classList.remove('speaking');
+        audioEl = null;
+      }
+
+      async function speak(text) {
+        const trimmed = (text || '').trim();
+        if (!trimmed) return;
+        stopSpeaking();
+        if (engineSelect.value === 'google') {
+          try { await speakGoogle(trimmed); }
+          catch (e) { speakBrowser(trimmed); }
+        } else {
+          speakBrowser(trimmed);
+        }
+      }
+
+      /* ---------- Reader: word tokens + phrase on punct ---------- */
+      function tokenizeWords(text) {
+        // Capture words, punctuation, or whitespace/newlines
+        return text.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*|[.!?,;:]+|\s+|[^\s]/g) || [];
+      }
+
+      function isWord(token) {
+        return /^[A-Za-z0-9]/.test(token);
+      }
+
+      function isPunct(token) {
+        return /^[.!?,;:]+$/.test(token);
+      }
+
+      function clearPhraseGlow() {
+        preview.querySelectorAll('.phrase-glow').forEach((el) => el.classList.remove('phrase-glow'));
+      }
+
+      function highlightPhraseAround(punctEl) {
+        clearPhraseGlow();
+        const nodes = Array.from(preview.childNodes);
+        const idx = nodes.indexOf(punctEl);
+        if (idx < 0) return;
+
+        // Walk left until previous phrase boundary punct
+        let start = idx;
+        for (let i = idx - 1; i >= 0; i--) {
+          const n = nodes[i];
+          if (n.nodeType === 1 && n.classList && n.classList.contains('punct')) break;
+          start = i;
+        }
+        // Include from start to punct (inclusive)
+        for (let i = start; i <= idx; i++) {
+          const n = nodes[i];
+          if (n.nodeType === 1 && (n.classList.contains('word') || n.classList.contains('punct'))) {
+            n.classList.add('phrase-glow');
+          }
+        }
+      }
+
+      function setReaderActionsEnabled(on) {
+        speaker.disabled = !on;
+        openTranslateBtn.disabled = !on;
+        openYouglishBtn.disabled = !on;
+      }
+
+      function renderPreview(text) {
+        hidePopup();
+        preview.innerHTML = '';
+        if (!text.trim()) {
+          const empty = document.createElement('span');
+          empty.className = 'preview-empty';
+          empty.textContent = 'Your text will appear here. Hover a word, or select text for lookup.';
+          preview.appendChild(empty);
+          setReaderActionsEnabled(false);
+          return;
+        }
+
+        setReaderActionsEnabled(true);
+        tokenizeWords(text).forEach((token) => {
+          if (isWord(token)) {
+            const span = document.createElement('span');
+            span.className = 'word';
+            span.textContent = token;
+            span.dataset.text = token;
+            span.title = 'Click to speak';
+            span.addEventListener('mouseenter', () => {
+              clearPhraseGlow();
+              span.classList.add('is-hover');
+            });
+            span.addEventListener('mouseleave', () => span.classList.remove('is-hover'));
+            span.addEventListener('click', (e) => {
+              // Don't speak if user is selecting
+              if (window.getSelection && String(window.getSelection()).trim()) return;
+              e.stopPropagation();
+              speak(token);
+            });
+            preview.appendChild(span);
+          } else if (isPunct(token)) {
+            const span = document.createElement('span');
+            span.className = 'punct';
+            span.textContent = token;
+            span.title = 'Hover to highlight phrase';
+            span.addEventListener('mouseenter', () => {
+              span.classList.add('is-hover');
+              highlightPhraseAround(span);
+            });
+            span.addEventListener('mouseleave', () => {
+              span.classList.remove('is-hover');
+              clearPhraseGlow();
+            });
+            span.addEventListener('click', () => {
+              // Speak the glowing phrase
+              const parts = [];
+              preview.querySelectorAll('.phrase-glow').forEach((el) => parts.push(el.textContent));
+              if (parts.length) speak(parts.join(''));
+            });
+            preview.appendChild(span);
+          } else {
+            preview.appendChild(document.createTextNode(token));
+          }
+        });
+      }
+
+      /* ---------- Selection popup ---------- */
+      function hidePopup() {
+        lookupPopup.classList.remove('show');
+        selectedLookup = '';
+      }
+
+      function showPopupForSelection() {
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed || !sel.rangeCount) {
+          hidePopup();
+          return;
+        }
+
+        const text = String(sel).trim();
+        if (!text || text.length > 120) {
+          hidePopup();
+          return;
+        }
+
+        // Only show if selection is inside preview
+        const anchor = sel.anchorNode;
+        if (!preview.contains(anchor)) {
+          hidePopup();
+          return;
+        }
+
+        selectedLookup = text;
+        popupText.textContent = text;
+
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        const card = lookupPopup.parentElement;
+        const cardRect = card.getBoundingClientRect();
+
+        lookupPopup.style.left = (rect.left + rect.width / 2 - cardRect.left) + 'px';
+        lookupPopup.style.top = (rect.top - cardRect.top - 48) + 'px';
+        lookupPopup.classList.add('show');
+      }
+
+      document.addEventListener('mouseup', () => {
+        setTimeout(showPopupForSelection, 10);
+      });
+
+      document.addEventListener('keyup', (e) => {
+        if (e.key === 'Shift' || e.key.startsWith('Arrow')) {
+          setTimeout(showPopupForSelection, 10);
+        }
+      });
+
+      document.addEventListener('mousedown', (e) => {
+        if (!lookupPopup.contains(e.target)) hidePopup();
+      });
+
+      document.getElementById('popup-cambridge').addEventListener('click', () => {
+        if (selectedLookup) openUrl(buildCambridgeUrl(selectedLookup));
+      });
+      document.getElementById('popup-translate').addEventListener('click', () => {
+        if (selectedLookup) openUrl(buildTranslateUrl(selectedLookup));
+      });
+      document.getElementById('popup-define').addEventListener('click', () => {
+        if (selectedLookup) openUrl(buildGoogleDefineUrl(selectedLookup));
+      });
+
+      input.addEventListener('input', () => renderPreview(input.value));
+
+      speaker.addEventListener('click', () => {
+        if (speaker.classList.contains('speaking')) stopSpeaking();
+        else speak(input.value);
+      });
+
+      openTranslateBtn.addEventListener('click', () => openUrl(buildTranslateUrl(input.value)));
+      openYouglishBtn.addEventListener('click', () => openUrl(buildYouglishUrl(input.value.slice(0, 80))));
+
+      /* ---------- Vocab ---------- */
+      function currentVocab() { return vocabInput.value.trim(); }
+
+      function syncVocabButtons() {
+        const has = !!currentVocab();
+        vocabSubmit.disabled = !has;
+        document.querySelectorAll('.brand-btn[data-lookup]').forEach((btn) => {
+          btn.disabled = !has;
+        });
+      }
+
+      const lookupHandlers = {
+        oxford: (w) => openUrl(buildOxfordUrl(w)),
+        'google-define': (w) => openUrl(buildGoogleDefineUrl(w)),
+        translate: (w) => openUrl(buildTranslateUrl(w)),
+        ozdic: (w) => openUrl(buildOzdicUrl(w)),
+        phrasal: (w) => openUrl(buildPhrasalUrl(w)),
+        'cambridge-pv': (w) => openUrl(buildCambridgeUrl(w)),
+        thesaurus: (w) => openUrl(buildThesaurusUrl(w)),
+        reverso: (w) => openUrl(buildReversoUrl(w)),
+        ludwig: (w) => openUrl(buildLudwigUrl(w)),
+        youglish: (w) => openUrl(buildYouglishUrl(w)),
+        forvo: (w) => openUrl(buildForvoUrl(w)),
+      };
+
+      vocabInput.addEventListener('input', syncVocabButtons);
+      vocabForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const w = currentVocab();
+        if (w) openUrl(buildCambridgeUrl(w));
+      });
+
+      document.querySelectorAll('.brand-btn[data-lookup]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const w = currentVocab();
+          const fn = lookupHandlers[btn.dataset.lookup];
+          if (w && fn) fn(w);
+        });
+      });
+
+      /* ---------- Speak ---------- */
+      function updateSpeakTarget() {
+        const t = speakInput.value.trim();
+        speakTarget.textContent = t || 'Type a sentence above, then press Hear / Check.';
+        speakPlay.disabled = !t;
+        speakMic.disabled = !t;
+      }
+
+      speakInput.addEventListener('input', updateSpeakTarget);
+
+      document.querySelectorAll('.speak-sample').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          speakInput.value = chip.textContent;
+          updateSpeakTarget();
+        });
+      });
+
+      speakPlay.addEventListener('click', () => speak(speakInput.value));
+      speakIpa.addEventListener('click', () => openUrl('https://toipa.org/speech-to-ipa'));
+
+      function normalize(s) {
+        return s.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
+      }
+
+      function similarity(a, b) {
+        const wa = normalize(a).split(' ').filter(Boolean);
+        const wb = normalize(b).split(' ').filter(Boolean);
+        if (!wa.length || !wb.length) return 0;
+        const setB = new Set(wb);
+        let hit = 0;
+        wa.forEach((w) => { if (setB.has(w)) hit += 1; });
+        const precision = hit / wa.length;
+        const recall = hit / wb.length;
+        return Math.round(((2 * precision * recall) / (precision + recall || 1)) * 100);
+      }
+
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      function clearRecording() {
+        if (recordingUrl) {
+          URL.revokeObjectURL(recordingUrl);
+          recordingUrl = '';
+        }
+        myRecordingEl.removeAttribute('src');
+        playRecordingBtn.disabled = true;
+        compareModelBtn.disabled = true;
+      }
+
+      function stopMediaTracks() {
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((t) => t.stop());
+          mediaStream = null;
+        }
+      }
+
+      function finishRecording() {
+        return new Promise((resolve) => {
+          if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+            resolve();
+            return;
+          }
+          mediaRecorder.onstop = () => {
+            stopMediaTracks();
+            if (!recordedChunks.length) {
+              resolve();
+              return;
+            }
+            const blob = new Blob(recordedChunks, { type: recordedChunks[0].type || 'audio/webm' });
+            recordedChunks = [];
+            if (recordingUrl) URL.revokeObjectURL(recordingUrl);
+            recordingUrl = URL.createObjectURL(blob);
+            myRecordingEl.src = recordingUrl;
+            playRecordingBtn.disabled = false;
+            compareModelBtn.disabled = !speakInput.value.trim();
+            resolve();
+          };
+          mediaRecorder.stop();
+        });
+      }
+
+      async function startRecording() {
+        clearRecording();
+        recordedChunks = [];
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+          ? 'audio/webm;codecs=opus'
+          : MediaRecorder.isTypeSupported('audio/webm')
+            ? 'audio/webm'
+            : '';
+        mediaRecorder = mime ? new MediaRecorder(mediaStream, { mimeType: mime }) : new MediaRecorder(mediaStream);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) recordedChunks.push(e.data);
+        };
+        mediaRecorder.start();
+      }
+
+      playRecordingBtn.addEventListener('click', () => {
+        if (!recordingUrl) return;
+        stopSpeaking();
+        myRecordingEl.currentTime = 0;
+        myRecordingEl.play().catch(() => {});
+      });
+
+      compareModelBtn.addEventListener('click', () => {
+        myRecordingEl.pause();
+        speak(speakInput.value);
+      });
+
+      speakMic.addEventListener('click', async () => {
+        scoreBox.classList.add('show');
+
+        async function endSession() {
+          if (!listening && (!mediaRecorder || mediaRecorder.state === 'inactive')) return;
+          listening = false;
+          speakMic.classList.remove('listening');
+          speakMic.textContent = 'Check me';
+          await finishRecording();
+          if (recordingUrl) {
+            stopSpeaking();
+            myRecordingEl.currentTime = 0;
+            myRecordingEl.play().catch(() => {});
+          }
+        }
+
+        if (listening) {
+          if (recognition) {
+            try { recognition.stop(); } catch (e) { /* ignore */ }
+          } else {
+            await endSession();
+          }
+          return;
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          scoreValue.textContent = 'N/A';
+          scoreHeard.textContent = 'Mic recording not supported in this browser.';
+          return;
+        }
+
+        try {
+          await startRecording();
+        } catch (err) {
+          scoreValue.textContent = 'Error';
+          scoreHeard.textContent = 'Mic permission blocked. Allow microphone and try again.';
+          return;
+        }
+
+        listening = true;
+        speakMic.classList.add('listening');
+        speakMic.textContent = 'Stop';
+        scoreValue.textContent = '…';
+        scoreHeard.textContent = 'Speak now — recording…';
+        playRecordingBtn.disabled = true;
+
+        if (!SpeechRecognition) {
+          scoreHeard.textContent = 'Recording… (no speech score in this browser). Press Stop when done.';
+          return;
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = accentSelect.value;
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        recognition.continuous = false;
+
+        recognition.onresult = (event) => {
+          const heard = event.results[0][0].transcript;
+          const score = similarity(speakInput.value, heard);
+          scoreValue.textContent = score + '% match';
+          scoreHeard.textContent = heard;
+          scoreValue.style.color = score >= 80 ? '#008a05' : score >= 55 ? '#b45a00' : '#c13515';
+        };
+
+        recognition.onerror = () => {
+          if (scoreValue.textContent === '…') {
+            scoreValue.textContent = '—';
+            scoreHeard.textContent = 'Could not score, but recording was saved. Press Play my voice.';
+          }
+        };
+
+        recognition.onend = () => {
+          endSession();
+        };
+
+        try {
+          recognition.start();
+        } catch (e) {
+          scoreHeard.textContent = 'Recording… Press Stop when done.';
+        }
+      });
+
+      /* ---------- Tabs ---------- */
+      document.querySelectorAll('.tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.tab').forEach((t) => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+          });
+          document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
+          tab.classList.add('active');
+          tab.setAttribute('aria-selected', 'true');
+          const panel = document.getElementById('panel-' + tab.dataset.tab);
+          if (panel) panel.classList.add('active');
+          if (tab.dataset.tab === 'vocab') vocabInput.focus();
+          if (tab.dataset.tab === 'reader') input.focus();
+          if (tab.dataset.tab === 'speak') speakInput.focus();
+          hidePopup();
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
