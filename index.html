@@ -457,12 +457,13 @@
       z-index: 50;
       display: none;
       align-items: center;
-      gap: 6px;
-      padding: 6px;
+      gap: 4px;
+      padding: 6px 8px;
       background: #222;
       border-radius: 999px;
       box-shadow: var(--shadow-hover);
       transform: translateX(-50%);
+      white-space: nowrap;
     }
 
     .lookup-popup.show { display: flex; }
@@ -479,21 +480,107 @@
       display: grid;
       place-items: center;
       transition: background 0.12s ease;
+      flex-shrink: 0;
     }
 
     .lookup-popup button:hover { background: rgba(255, 255, 255, 0.12); }
 
+    .lookup-popup button.add-btn {
+      width: auto;
+      min-width: 36px;
+      padding: 0 12px;
+      border-radius: 999px;
+      background: var(--palette-bg-primary-core);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0;
+    }
+
+    .lookup-popup button.add-btn:hover {
+      background: #e00b41;
+    }
+
+    .lookup-popup button.added {
+      background: #008a05 !important;
+    }
+
     .lookup-popup button svg { width: 18px; height: 18px; }
 
     .lookup-popup .sel-text {
-      max-width: 140px;
+      max-width: 100px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       color: rgba(255, 255, 255, 0.7);
       font-size: 12px;
       font-weight: 500;
-      padding: 0 6px;
+      padding: 0 4px;
+    }
+
+    .card.preview-card {
+      overflow: visible;
+    }
+
+    .vocab-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .vocab-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 4px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      font-size: 16px;
+      font-weight: 500;
+    }
+
+    .vocab-list li:last-child { border-bottom: none; }
+
+    .vocab-list .bullet {
+      color: var(--palette-bg-primary-core);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .vocab-list .item-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .vocab-list .remove-btn {
+      appearance: none;
+      border: none;
+      background: transparent;
+      color: var(--palette-text-secondary);
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .vocab-list .remove-btn:hover {
+      background: var(--palette-surface-light);
+      color: var(--palette-text-primary);
+    }
+
+    .list-empty {
+      color: var(--palette-text-disabled);
+      font-size: 15px;
+      font-weight: 400;
+      padding: 8px 0;
+    }
+
+    .list-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
     }
 
     @media (max-width: 550px) {
@@ -528,7 +615,7 @@
         <textarea id="input" placeholder="Paste or type an English paragraph here…" spellcheck="true" autofocus></textarea>
       </div>
 
-      <div class="card" style="position: relative;">
+      <div class="card preview-card" style="position: relative;">
         <div class="preview-header">
           <div class="card-label">Live preview</div>
           <div class="action-row">
@@ -577,14 +664,27 @@
           <button type="button" id="popup-define" title="Google meaning search">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></svg>
           </button>
+          <button type="button" id="popup-add" class="add-btn" title="Add to vocab list">+</button>
         </div>
 
         <p class="hint">
           <strong>Hover a word</strong> to highlight it.
           <strong>Hover near , or .</strong> to highlight the whole phrase.
-          <strong>Select text</strong> → popup: Cambridge · Translate · Google define.
+          <strong>Select text</strong> → popup: press <strong>+</strong> to add below · Cambridge · Translate · Define.
           <strong>Click a word</strong> to hear it.
         </p>
+      </div>
+
+      <div class="card" id="reader-list-card">
+        <div class="preview-header">
+          <div class="card-label">Vocab to review</div>
+          <div class="action-row">
+            <button type="button" class="cta-btn secondary" id="copy-list" disabled>Copy</button>
+            <button type="button" class="cta-btn secondary" id="clear-list" disabled>Clear</button>
+          </div>
+        </div>
+        <ul class="vocab-list" id="vocab-list"></ul>
+        <p class="list-empty" id="list-empty">Select text above and press + to build your list here.</p>
       </div>
     </section>
 
@@ -734,6 +834,20 @@
       const playRecordingBtn = document.getElementById('play-recording');
       const compareModelBtn = document.getElementById('compare-model');
       const myRecordingEl = document.getElementById('my-recording');
+      const vocabListEl = document.getElementById('vocab-list');
+      const listEmptyEl = document.getElementById('list-empty');
+      const clearListBtn = document.getElementById('clear-list');
+      const copyListBtn = document.getElementById('copy-list');
+      const popupAddBtn = document.getElementById('popup-add');
+
+      const LIST_KEY = 'cambridge-vocab-list';
+      let vocabList = [];
+      try {
+        vocabList = JSON.parse(localStorage.getItem(LIST_KEY) || '[]');
+        if (!Array.isArray(vocabList)) vocabList = [];
+      } catch (e) {
+        vocabList = [];
+      }
 
       let audioEl = null;
       let voices = [];
@@ -1038,7 +1152,9 @@
         lookupPopup.classList.add('show');
       }
 
-      document.addEventListener('mouseup', () => {
+      document.addEventListener('mouseup', (e) => {
+        // Don't re-evaluate selection when clicking inside the popup
+        if (lookupPopup.contains(e.target)) return;
         setTimeout(showPopupForSelection, 10);
       });
 
@@ -1052,6 +1168,11 @@
         if (!lookupPopup.contains(e.target)) hidePopup();
       });
 
+      // Keep selected text even if browser clears selection when clicking popup
+      lookupPopup.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+      });
+
       document.getElementById('popup-cambridge').addEventListener('click', () => {
         if (selectedLookup) openUrl(buildCambridgeUrl(selectedLookup));
       });
@@ -1061,6 +1182,108 @@
       document.getElementById('popup-define').addEventListener('click', () => {
         if (selectedLookup) openUrl(buildGoogleDefineUrl(selectedLookup));
       });
+
+      /* ---------- My vocab list ---------- */
+      function saveList() {
+        localStorage.setItem(LIST_KEY, JSON.stringify(vocabList));
+      }
+
+      function renderList() {
+        vocabListEl.innerHTML = '';
+        if (!vocabList.length) {
+          listEmptyEl.style.display = 'block';
+          clearListBtn.disabled = true;
+          copyListBtn.disabled = true;
+          return;
+        }
+        listEmptyEl.style.display = 'none';
+        clearListBtn.disabled = false;
+        copyListBtn.disabled = false;
+
+        vocabList.forEach((item, index) => {
+          const li = document.createElement('li');
+
+          const bullet = document.createElement('span');
+          bullet.className = 'bullet';
+          bullet.textContent = '–';
+
+          const text = document.createElement('span');
+          text.className = 'item-text';
+          text.textContent = item;
+
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'remove-btn';
+          remove.title = 'Remove';
+          remove.setAttribute('aria-label', 'Remove ' + item);
+          remove.textContent = '×';
+          remove.addEventListener('click', () => {
+            vocabList.splice(index, 1);
+            saveList();
+            renderList();
+          });
+
+          li.appendChild(bullet);
+          li.appendChild(text);
+          li.appendChild(remove);
+          vocabListEl.appendChild(li);
+        });
+      }
+
+      function addToList(raw) {
+        const text = (raw || '').trim().replace(/\s+/g, ' ');
+        if (!text) return false;
+        const exists = vocabList.some((v) => v.toLowerCase() === text.toLowerCase());
+        if (exists) return false;
+        vocabList.push(text);
+        saveList();
+        renderList();
+        return true;
+      }
+
+      popupAddBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!selectedLookup) return;
+        const ok = addToList(selectedLookup);
+        popupAddBtn.classList.add('added');
+        popupAddBtn.title = ok ? 'Added!' : 'Already in list';
+        setTimeout(() => {
+          popupAddBtn.classList.remove('added');
+          popupAddBtn.title = 'Add to my list';
+          hidePopup();
+        }, 600);
+      });
+
+      copyListBtn.addEventListener('click', async () => {
+        if (!vocabList.length) return;
+        const plain = vocabList.map((v) => '- ' + v).join('\n');
+        try {
+          await navigator.clipboard.writeText(plain);
+          const prev = copyListBtn.textContent;
+          copyListBtn.textContent = 'Copied!';
+          setTimeout(() => { copyListBtn.textContent = prev; }, 1000);
+        } catch (err) {
+          // Fallback
+          const ta = document.createElement('textarea');
+          ta.value = plain;
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          copyListBtn.textContent = 'Copied!';
+          setTimeout(() => { copyListBtn.textContent = 'Copy'; }, 1000);
+        }
+      });
+
+      clearListBtn.addEventListener('click', () => {
+        if (!vocabList.length) return;
+        vocabList = [];
+        saveList();
+        renderList();
+      });
+
+      renderList();
 
       input.addEventListener('input', () => renderPreview(input.value));
 
